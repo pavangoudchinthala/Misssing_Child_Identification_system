@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missing Child Identification System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 30px;
+    width: 100%;
+    max-width: 750px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    color: #fff;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(20px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.05);
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 5px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus {
+    box-shadow: 0 0 8px #00c6ff;
+    transform: scale(1.02);
+}
+
+/* Upload Box */
+.upload-box {
+    margin-top: 10px;
+    padding: 20px;
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.upload-box:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.upload-box.dragover {
+    border-color: #00c6ff;
+}
+
+/* Preview */
+.preview {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.preview img {
+    width: 120px;
+    border-radius: 10px;
+}
+
+/* Button */
+button {
+    margin-top: 15px;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+.divider {
+    text-align: center;
+    margin: 20px 0;
+    opacity: 0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Missing Child Identification System</h1>
+
+<!-- ADD CHILD -->
+<div class="section">
+<h2>Add Missing Child</h2>
+
+<form id="missingChildForm" action="/addMissingChild" method="POST" enctype="multipart/form-data">
+
+<label>Name</label>
+<input type="text" name="name" required>
+
+<label>Age</label>
+<input type="text" name="age" required>
+
+<label>Gender</label>
+<input type="text" name="gender">
+
+<label>Height (cm)</label>
+<input type="text" name="height">
+
+<label>Weight (kg)</label>
+<input type="text" name="weight">
+
+<label>Hair Color</label>
+<input type="text" name="hairColor">
+
+<label>Eye Color</label>
+<input type="text" name="eyeColor">
+
+<!-- IMAGE UPLOAD -->
+<label>Upload Photo</label>
+<div class="upload-box" id="uploadBox">
+    Drag & Drop Image or Click
+    <input type="file" id="photo" name="photo" accept="image/*" hidden>
+</div>
+
+<div class="preview" id="preview"></div>
+
+<button type="button" onclick="addMissingChild()">Add Child</button>
+
+</form>
+</div>
+
+<div class="divider">OR</div>
+
+<!-- FIND CHILD -->
+<div class="section">
+<h2>Find Missing Child</h2>
+
+<form id="findMissingChildForm" action="/findMissingChild" method="GET">
+<label>Enter Name</label>
+<input type="text" id="childName" required>
+
+<button type="button" onclick="findMissingChild()">Search</button>
+</form>
+</div>
+
+</div>
+
+<script>
+// ================= IMAGE PREVIEW =================
+const uploadBox = document.getElementById('uploadBox');
+const fileInput = document.getElementById('photo');
+const preview = document.getElementById('preview');
+
+uploadBox.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', showPreview);
+
+uploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadBox.classList.add('dragover');
+});
+
+uploadBox.addEventListener('dragleave', () => {
+    uploadBox.classList.remove('dragover');
+});
+
+uploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadBox.classList.remove('dragover');
+    fileInput.files = e.dataTransfer.files;
+    showPreview();
+});
+
+function showPreview() {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ================= ADD CHILD =================
+function addMissingChild() {
+    const form = document.getElementById('missingChildForm');
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: form.method,
+        body: formData
+    })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+        form.reset();
+        preview.innerHTML = "";
+    })
+    .catch(err => console.log(err));
+}
+
+// ================= FIND CHILD =================
+function findMissingChild() {
+    const name = document.getElementById('childName').value;
+    const form = document.getElementById('findMissingChildForm');
+
+    fetch(`${form.action}/${name}`, {
+        method: form.method
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data) {
+            window.location.href = `/displayChild?name=${data.name}&age=${data.age}&gender=${data.gender}&height=${data.height}&weight=${data.weight}&hairColor=${data.hairColor}&eyeColor=${data.eyeColor}&photo=${data.photo}`;
+        } else {
+            alert("Child not found");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
