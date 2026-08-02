@@ -1,7 +1,8 @@
 streamlit
+tensorflow-cpu
+tf-keras
 deepface
 opencv-python-headless
+numpy<2.0.0
 pillow
 pandas
-numpy
-tf-keras
